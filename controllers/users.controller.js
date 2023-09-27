@@ -1,6 +1,8 @@
 const UserModel = require("../models/user.model");
 const express = require("express");
 const bcrypt = require("bcrypt");
+const saltRounds = 10;
+const bycrptJs = require("bcryptjs");
 const router = express.Router();
 const jwt = require("jsonwebtoken");
 
@@ -8,28 +10,45 @@ const jwt = require("jsonwebtoken");
 exports.userLogin = async (req, res) => {
   try {
     const { username, password } = req.body;
-    const user = await UserModel.findOne({ username });
+    const user = await UserModel.findOne({ username: username });
+    const userPassword = user.password;
 
+    if (!username) {
+      return res.send({
+        status: false,
+        message: "username field is required",
+      });
+    }
+
+    if (!password) {
+      return res.send({
+        status: false,
+        message: "Password field is required",
+      });
+    }
     // Check if the user exists
     if (!user) {
       return res.status(404).json({ message: "User not found" });
     }
 
     // Verify the password
-    const isPasswordValid =  await bcrypt.compare(password, user.password); 
-    console.log(user.password)
-    console.log(password)
-    console.log(isPasswordValid)
-    if (!isPasswordValid) {
-      return res.status(401).json({ message: "Invalid credentials" });
-    }
+    const isPasswordValid = await bcrypt.compare(
+      password,
+      userPassword,
+      function (err, result) {
+        if (result) {
+          console.log(result);
+          // Create a JWT token
+          const token = jwt.sign({ userId: user._id }, "your-secret-key", {
+            expiresIn: "1h", // Token expiration time
+          });
 
-    // Create a JWT token
-    const token = jwt.sign({ userId: user._id }, "your-secret-key", {
-      expiresIn: "1h", // Token expiration time
-    });
-
-    res.status(200).json({ token });
+          res.status(200).json({ token });
+        } else {
+          return res.status(401).json({ message: "Invalid credentials" });
+        }
+      }
+    );
   } catch (error) {
     console.error("Error logging in user:", error);
     res.status(500).json({ message: "Internal server error" });
@@ -61,13 +80,17 @@ exports.createUser = async (req, res) => {
         .status(400)
         .json({ message: "Username or Email already taken" });
     }
-    const hashedPassword = await bcrypt.hash(password, 10);
+    // const hashKey = await bycrptJs.genSalt(10);
+    // const hashedPassword = await bycrptJs.hash(password, hashKey);
+
+    const salt = bcrypt.genSaltSync(saltRounds);
+    const hash = bcrypt.hashSync(password, salt);
 
     // create new user instance
     const newUser = new UserModel({
       username,
       email,
-      password: hashedPassword,
+      password: hash,
     });
     await newUser.save();
     res.status(201).json({ message: "User registered successfully" });
@@ -100,7 +123,7 @@ exports.updateUserDetails = async (req, res) => {
   try {
     const userName = req.params.username;
     const { username, email, password } = req.body;
-    const user = await UserModel.findOne({ userName });
+    const user = await UserModel.findOne({ username: userName });
 
     if (!user) {
       return res.status(404).json({ message: "User not found" });
