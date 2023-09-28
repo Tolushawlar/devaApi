@@ -37,3 +37,51 @@ exports.createWallet = async (req, res) => {
     return res.status(500).json({ message: "Internal server error" });
   }
 };
+
+exports.getWalletDetails = async (req, res) => {
+  try {
+    const walletId = req.params.walletId;
+    const walletInfo = await WalletModel.findOne({ _id: walletId });
+    if (!walletInfo) {
+      return res.status(400).json({ message: "Wallet not found" });
+    }
+    res.status(200).json(walletInfo);
+  } catch (error) {
+    console.error("Error fetching user details:", error);
+    res.status(500).json({ message: "Internal server error" });
+  }
+};
+
+exports.updateWallet = async (req, res) => {
+  try {
+    const walletId = req.params.walletId;
+    const { balance } = req.body;
+    const walletInfo = await WalletModel.findOne({ _id: walletId });
+    if (!walletInfo) {
+      return res.status(400).json({ message: "Wallet not found" });
+    }
+    if (balance) {
+      walletInfo.balance = balance;
+    }
+    await walletInfo.save();
+    res.status(200).json(walletInfo);
+  } catch (error) {
+    console.error("Error updating wallet details", error);
+    res.status(500).json({ message: "Internal server error" });
+  }
+};
+
+exports.deleteWallet = async (req, res) => {
+  try {
+    const walletId = req.params.walletId;
+    const walletInfo = await WalletModel.findOne({ _id: walletId });
+    if (!walletInfo) {
+      return res.status(400).json({ message: "wallet not found" });
+    }
+    await walletInfo.deleteOne({ _id: walletId });
+    res.status(200).json({ message: "wallet deleted" });
+  } catch (error) {
+    console.error("Error deleting wallet", error);
+    res.status(500).json({ message: "Internal server error" });
+  }
+};
