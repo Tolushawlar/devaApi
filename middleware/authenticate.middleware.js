@@ -8,13 +8,10 @@ function authenticate(req, res, next) {
   }
 
   try {
-    // Verify the JWT token and decode it to get user information
     const decoded = jwt.verify(token, "your-secret-key");
-
-    // Attach user information to the request object
     req.user = decoded.user;
 
-    next(); // User is authenticated, proceed to the next middleware or route handler
+    next();
   } catch (error) {
     return res.status(401).json({ message: "Unauthorized" });
   }

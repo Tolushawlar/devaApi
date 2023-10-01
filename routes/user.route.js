@@ -16,6 +16,6 @@ router.delete(
   authenticate,
   userController.deleteUserByUsername
 );
-router.post("/api/user/login", authenticate, userController.userLogin);
+router.post("/api/user/login", userController.userLogin);
 
 module.exports = router;

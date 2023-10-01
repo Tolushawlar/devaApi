@@ -77,7 +77,7 @@ exports.createUser = async (req, res) => {
     });
     if (existingUser) {
       return res
-        .status(400)
+        .status(40)
         .json({ message: "Username or Email already taken" });
     }
     // const hashKey = await bycrptJs.genSalt(10);
