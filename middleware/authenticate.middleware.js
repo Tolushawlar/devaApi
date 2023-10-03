@@ -4,7 +4,7 @@ function authenticate(req, res, next) {
   const token = req.header("Authorization");
 
   if (!token) {
-    return res.status(401).json({ message: "Unauthorized" });
+    return res.status(401).json({ message: "Unauthorized, Please Login!!" });
   }
 
   try {
@@ -13,7 +13,7 @@ function authenticate(req, res, next) {
 
     next();
   } catch (error) {
-    return res.status(401).json({ message: "Unauthorized" });
+    return res.status(401).json({ message: "Unauthorized, Please Login!!" });
   }
 }
 

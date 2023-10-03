@@ -11,7 +11,6 @@ exports.userLogin = async (req, res) => {
   try {
     const { username, password } = req.body;
     const user = await UserModel.findOne({ username: username });
-    const userPassword = user.password;
 
     if (!username) {
       return res.send({
@@ -34,7 +33,7 @@ exports.userLogin = async (req, res) => {
     // Verify the password
     const isPasswordValid = await bcrypt.compare(
       password,
-      userPassword,
+      user.password,
       function (err, result) {
         if (result) {
           console.log(result);
@@ -77,12 +76,9 @@ exports.createUser = async (req, res) => {
     });
     if (existingUser) {
       return res
-        .status(40)
+        .status(404)
         .json({ message: "Username or Email already taken" });
     }
-    // const hashKey = await bycrptJs.genSalt(10);
-    // const hashedPassword = await bycrptJs.hash(password, hashKey);
-
     const salt = bcrypt.genSaltSync(saltRounds);
     const hash = bcrypt.hashSync(password, salt);
 

@@ -5,6 +5,7 @@ const authenticate = require("../middleware/authenticate.middleware");
 const transcationsModel = require("../models/transcations.model");
 
 router.post("/api/transaction/send", transactionController.createTransaction);
+router.post("/api/transaction/buy/:walletId", transactionController.addCoin);
 router.get("/api/transactions", transactionController.getTransactions);
 
 module.exports = router;

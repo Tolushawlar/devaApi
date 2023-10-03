@@ -2,6 +2,7 @@ const WalletModel = require("../models/wallet.model");
 const express = require("express");
 const router = express.Router();
 const jwt = require("jsonwebtoken");
+const userModel = require("../models/user.model");
 
 exports.getWallet = async (req, res) => {
   try {
@@ -15,12 +16,9 @@ exports.getWallet = async (req, res) => {
 
 exports.createWallet = async (req, res) => {
   try {
-    // Get the user ID from authentication (you need to implement this)
     const userId = req.params.userId;
-    console.log(userId);
     // Check if the user already has a wallet
     const existingWallet = await WalletModel.findOne({ userId });
-
     if (existingWallet) {
       return res.status(400).json({ message: "User already has a wallet." });
     }
